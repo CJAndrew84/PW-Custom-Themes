@@ -1,0 +1,14 @@
+{
+  "name": "AtkinsRealis Dark",
+  "background": "#182D38",
+  "surface": "#1F3844",
+  "surfaceAlt": "#27424F",
+  "text": "#FFFFFF",
+  "textMuted": "#BEDAE5",
+  "accent": "#3F32F1",
+  "border": "#2E4A57",
+  "titleBar": "#182D38",
+  "titleText": "#BEDAE5",
+  "telerikPackageFile": "AtkinsRealisDark.tssp",
+  "telerikThemeName": "FluentDark"
+}

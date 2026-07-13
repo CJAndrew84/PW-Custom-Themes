@@ -1,1 +1,101 @@
-# PW-Custom-Themes
+# PWThemes — custom theming (corporate branding) for ProjectWise Explorer
+
+Native .mrr shim → net481/x86 C# assembly inside `pwc.exe`. Generalised from
+dark-mode toggle to **named themes defined in JSON** — ship a corporate brand
+theme, a neutral dark, whatever you like, and switch live from a menu command.
+
+## How a theme is defined
+
+One JSON file per theme (see `themes/`):
+
+```json
+{
+  "name": "AtkinsRealis Dark",
+  "background": "#182D38", "surface": "#1F3844", "surfaceAlt": "#27424F",
+  "text": "#FFFFFF", "textMuted": "#BEDAE5",
+  "accent": "#3F32F1", "border": "#2E4A57",
+  "titleBar": "#182D38", "titleText": "#BEDAE5",
+  "telerikPackageFile": "AtkinsRealisDark.tssp",
+  "telerikThemeName": "FluentDark"
+}
+```
+
+Probe order — first match per name wins, so admins override without redeploying:
+
+1. `%ProgramData%\PWThemes\*.json` — enterprise push (Intune/SCCM)
+2. `<add-in dir>\themes\*.json` — deployed alongside the .mrr
+3. Compiled built-ins (Dark, AtkinsRealis Dark, AtkinsRealis Light)
+
+Last-used theme persists to `%ProgramData%\PWThemes\active.txt`.
+
+## Where each colour actually lands
+
+| Theme field | Mechanism | Where you see it |
+|---|---|---|
+| titleBar/titleText/border | DWM attrs 34/35/36 (**Win11 only**) | Branded window chrome |
+| background/surface/text | `WM_CTLCOLOR*` brushes | Native dialogs, edits, statics, listboxes |
+| *(IsDark, computed)* | uxtheme app mode + DarkMode_* parts | Menus, scrollbars, tree/listviews |
+| telerikPackageFile / telerikThemeName | `ThemeResolutionService` | The Rad grids — the bulk of modern PW UI |
+
+**The key design point:** the OS "DarkMode_Explorer" control parts are binary
+— you can have them or not, but you can't recolour them. So `Theme.IsDark`
+(computed from background luminance) decides whether to request them, and the
+actual *brand colours* ride on the three colourable channels: DWM chrome,
+WM_CTLCOLOR brushes, and the Telerik theme. A light corporate theme keeps
+standard light controls and still gets a fully branded titlebar + dialogs +
+grids.
+
+## Getting real branding into the Telerik grids (.tssp)
+
+The named-theme route (`telerikThemeName`) only gets you stock Telerik themes.
+For actual corporate colours in the grids:
+
+1. Open **Telerik Visual Style Builder** (ships with Telerik UI for WinForms —
+   match the version PW uses; check `Telerik.WinControls.dll` in PW's bin).
+2. Start from Fluent/FluentDark, repaint with the brand palette, name the
+   theme, export as `.tssp`.
+3. Drop the `.tssp` next to the theme JSON and reference it via
+   `telerikPackageFile` (relative paths resolve against the JSON's folder).
+
+The applier loads it via `ThemeResolutionService.LoadPackageFile()` — the
+supported Telerik mechanism — and discovers the registered theme name by
+diffing before/after. If the package fails (version mismatch), it falls back
+to `telerikThemeName`, then to Fluent/FluentDark by `IsDark`.
+
+## Menu wiring
+
+- Simple: one command → `ModuleEntry.CycleTheme()` steps through all themes.
+- Nicer: shim calls `ModuleEntry.GetThemeList()` (newline-separated) at load,
+  builds a Themes submenu, each item calls `ApplyThemeUtf16(name)`.
+
+**Shim exports are placeholders** — take the real module exports and `aaApi_*`
+menu registration from your PW SDK custom-module sample.
+
+## Staged rollout
+
+```csharp
+ThemeManager.Instance.EnabledStages =
+    ThemeManager.Stage.ProcessMode | ThemeManager.Stage.FramesAndControls;
+```
+
+Stages: ProcessMode → FramesAndControls → CbtHook → Telerik. Enable
+incrementally; Telerik last (theme application forces grid re-layout — the
+4s startup delay exists to keep that out of PW's startup window).
+Log: `%TEMP%\PWThemes.log`.
+
+## Design points baked in
+
+- Managed HWNDs skipped by the Win32 layer (`Control.FromHandle != null`) —
+  the two layers never fight over a window.
+- All native callback delegates rooted as fields (GC'd hook delegate = crash).
+- Live dark→light switching resets control parts via `SetWindowTheme(hwnd, null)`;
+  some repaint artefacts are inevitable — a PW restart gives the cleanest swap.
+- Nothing throws across the native boundary.
+
+## Known limits
+
+- Win10: no coloured titlebars (attr 34/35/36 no-op) — you get dark/light
+  immersive captions only. Win11 gets the full branded chrome.
+- Embedded web panes untouched.
+- Unsupported by Bentley; retest per PW Update (Telerik train can move — the
+  .tssp must match the shipped Telerik version).

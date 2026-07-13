@@ -1,0 +1,14 @@
+{
+  "name": "AtkinsRealis Light",
+  "background": "#FFFFFF",
+  "surface": "#F2F7FA",
+  "surfaceAlt": "#BEDAE5",
+  "text": "#182D38",
+  "textMuted": "#4A6472",
+  "accent": "#3F32F1",
+  "border": "#BEDAE5",
+  "titleBar": "#182D38",
+  "titleText": "#FFFFFF",
+  "telerikPackageFile": "AtkinsRealisLight.tssp",
+  "telerikThemeName": "Fluent"
+}

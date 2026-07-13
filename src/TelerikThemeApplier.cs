@@ -1,0 +1,161 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
+
+namespace PWDarkMode
+{
+    /// <summary>
+    /// Telerik layer, generalised for corporate branding. Two routes, in
+    /// preference order per theme:
+    ///
+    ///   1. **.tssp package** (Theme.TelerikPackageFile) — a theme built in
+    ///      Telerik Visual Style Builder with the full corporate palette,
+    ///      loaded via ThemeResolutionService.LoadPackageFile(). This is the
+    ///      *supported* Telerik mechanism for custom themes and the only way
+    ///      to get real branding (fonts, brand colours, hover states) into
+    ///      the Rad grids. Build once against PW's Telerik version, ship the
+    ///      .tssp next to the theme JSON.
+    ///
+    ///   2. **Named theme** (Theme.TelerikThemeName) — a stock theme already
+    ///      registered in-process or loadable from a Telerik.WinControls.Themes.*
+    ///      assembly next to pwc.exe. Good enough for generic dark/light;
+    ///      won't carry brand colours.
+    ///
+    /// Everything via reflection — no compile-time Telerik reference.
+    /// </summary>
+    internal sealed class TelerikThemeApplier
+    {
+        private const string WinControlsAsmName = "Telerik.WinControls";
+
+        internal string AppliedThemeName { get; private set; }
+
+        /// <summary>Apply the Telerik portion of a theme. Returns false if
+        /// Telerik isn't loaded or nothing usable was found.</summary>
+        internal bool Apply(Theme theme)
+        {
+            Assembly winControls = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == WinControlsAsmName);
+            if (winControls == null) return false;
+
+            Type trs = winControls.GetType("Telerik.WinControls.ThemeResolutionService");
+            if (trs == null) return false;
+
+            string resolved =
+                TryLoadPackage(trs, theme.TelerikPackageFile)
+                ?? TryNamedTheme(winControls, theme.TelerikThemeName)
+                ?? TryNamedTheme(winControls, theme.IsDark ? "FluentDark" : "Fluent");
+
+            if (resolved == null) return false;
+
+            PropertyInfo appTheme = trs.GetProperty("ApplicationThemeName",
+                BindingFlags.Public | BindingFlags.Static);
+            if (appTheme == null) return false;
+
+            appTheme.SetValue(null, resolved);
+            AppliedThemeName = resolved;
+            return true;
+        }
+
+        internal void RefreshOpenForms()
+        {
+            foreach (Form f in Application.OpenForms.Cast<Form>().ToArray())
+            {
+                try { f.Invalidate(true); f.Update(); } catch { /* closing */ }
+            }
+        }
+
+        // ------------------------------------------------------------------
+
+        /// <summary>Route 1: Visual Style Builder package. LoadPackageFile
+        /// registers the theme; its ThemeName comes from the package itself,
+        /// so we diff registered themes before/after to discover it.</summary>
+        private static string TryLoadPackage(Type trs, string packagePath)
+        {
+            if (string.IsNullOrEmpty(packagePath) || !File.Exists(packagePath)) return null;
+            try
+            {
+                string[] before = RegisteredThemeNames(trs);
+
+                MethodInfo load = trs.GetMethod("LoadPackageFile",
+                    BindingFlags.Public | BindingFlags.Static, null,
+                    new[] { typeof(string) }, null);
+                if (load == null) return null;
+                load.Invoke(null, new object[] { packagePath });
+
+                string[] after = RegisteredThemeNames(trs);
+                string newName = after.Except(before).FirstOrDefault();
+
+                // Fallback if the theme was already registered (e.g. re-apply):
+                // convention is package file named after the theme.
+                return newName ?? Path.GetFileNameWithoutExtension(packagePath);
+            }
+            catch
+            {
+                return null; // corrupt package or Telerik-version mismatch
+            }
+        }
+
+        /// <summary>Route 2: stock theme by name — already registered, or
+        /// loadable from a theme assembly next to pwc.exe / the add-in.</summary>
+        private static string TryNamedTheme(Assembly winControls, string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            Type trs = winControls.GetType("Telerik.WinControls.ThemeResolutionService");
+
+            if (RegisteredThemeNames(trs).Contains(name, StringComparer.OrdinalIgnoreCase))
+                return name;
+
+            string[] probeDirs =
+            {
+                Path.GetDirectoryName(winControls.Location),
+                AppDomain.CurrentDomain.BaseDirectory,
+                Path.GetDirectoryName(typeof(TelerikThemeApplier).Assembly.Location),
+            };
+
+            foreach (string dir in probeDirs.Where(d => !string.IsNullOrEmpty(d) && Directory.Exists(d)).Distinct())
+            {
+                string candidate = Path.Combine(dir, $"Telerik.WinControls.Themes.{name}.dll");
+                if (!File.Exists(candidate)) continue;
+                try
+                {
+                    Assembly themeAsm = Assembly.LoadFrom(candidate);
+                    Type themeType = themeAsm.GetTypes().FirstOrDefault(t =>
+                        !t.IsAbstract && InheritsByName(t, "RadThemeComponentBase"));
+                    if (themeType == null) continue;
+                    object component = Activator.CreateInstance(themeType); // instantiation registers it
+                    return themeType.GetProperty("ThemeName")?.GetValue(component) as string ?? name;
+                }
+                catch { /* version mismatch — keep probing */ }
+            }
+            return null;
+        }
+
+        private static string[] RegisteredThemeNames(Type trs)
+        {
+            try
+            {
+                MethodInfo getThemes = trs.GetMethod("GetAvailableThemes",
+                    BindingFlags.Public | BindingFlags.Static);
+                object result = getThemes?.Invoke(null, null)
+                    ?? trs.GetProperty("RegisteredThemes", BindingFlags.Public | BindingFlags.Static)
+                          ?.GetValue(null);
+                if (result is System.Collections.IEnumerable list)
+                    return list.Cast<object>()
+                               .Select(t => t.GetType().GetProperty("ThemeName")?.GetValue(t) as string)
+                               .Where(n => n != null)
+                               .ToArray();
+            }
+            catch { /* fall through */ }
+            return Array.Empty<string>();
+        }
+
+        private static bool InheritsByName(Type t, string baseName)
+        {
+            for (Type cur = t.BaseType; cur != null; cur = cur.BaseType)
+                if (cur.Name == baseName) return true;
+            return false;
+        }
+    }
+}
