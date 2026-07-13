@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+	<Filter Include="Source Files">
+	  <UniqueIdentifier>{4FC737F0-C7A0-4A1E-A3A0-9B1F1E6A7D7C}</UniqueIdentifier>
+	  <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+	</Filter>
+  </ItemGroup>
+  <ItemGroup>
+	<ClCompile Include="shim\PWDarkShim.cpp">
+	  <Filter>Source Files</Filter>
+	</ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,14 +1,8 @@
-# PWThemes — custom theming (corporate branding) for ProjectWise Explorer
+﻿# PWThemes — custom theming (corporate branding) for ProjectWise Explorer
 
-Native .mrr shim → net481/x86 C# assembly inside `pwc.exe`. For ProjectWise
-Explorer, the reliable path is native Win32/DWM/WM_CTLCOLOR theming applied to
-the Explorer HWND tree; Telerik is optional and only relevant if a specific
-ProjectWise dialog or add-in actually hosts `Telerik.WinControls` in the target
-build.
-
-The implementation is generalised from a dark-mode toggle to **named themes
-defined in JSON** — ship a corporate brand theme, a neutral dark, whatever you
-like, and switch live from a menu command.
+Native .mrr shim → net481/x86 C# assembly inside `pwc.exe`. Generalised from
+dark-mode toggle to **named themes defined in JSON** — ship a corporate brand
+theme, a neutral dark, whatever you like, and switch live from a menu command.
 
 ## How a theme is defined
 
@@ -51,23 +45,22 @@ WM_CTLCOLOR brushes, and the Telerik theme. A light corporate theme keeps
 standard light controls and still gets a fully branded titlebar + dialogs +
 grids.
 
-## What actually works in ProjectWise Explorer
+## Getting real branding into the Telerik grids (.tssp)
 
-Do not assume `ProjectWise Explorer` is fundamentally a Telerik-themed surface.
-We inspected the installed ProjectWise folders and the `bin` directory next to
-`pwc.exe` does not contain `Telerik.WinControls.dll`, so the primary theme path
-for Explorer itself should be the native Win32 layer already implemented here:
+The named-theme route (`telerikThemeName`) only gets you stock Telerik themes.
+For actual corporate colours in the grids:
 
-- DWM caption/border/text attributes on Windows 11
-- `WM_CTLCOLOR*` subclassing for dialogs and native controls
-- `SetWindowTheme` / `AllowDarkModeForWindow` for native control parts
-- optional `ThemeResolutionService` support only if a specific ProjectWise
-  dialog or add-in actually loads `Telerik.WinControls` in the target build
+1. Open **Telerik Visual Style Builder** (ships with Telerik UI for WinForms —
+   match the version PW uses; check `Telerik.WinControls.dll` in PW's bin).
+2. Start from Fluent/FluentDark, repaint with the brand palette, name the
+   theme, export as `.tssp`.
+3. Drop the `.tssp` next to the theme JSON and reference it via
+   `telerikPackageFile` (relative paths resolve against the JSON's folder).
 
-If you later find a ProjectWise dialog that is truly managed WinForms/Telerik,
-add that as an isolated opt-in path rather than assuming the whole Explorer UI
-is Telerik-based. That keeps the themeing logic aligned with the binaries
-actually shipped by the installed ProjectWise version.
+The applier loads it via `ThemeResolutionService.LoadPackageFile()` — the
+supported Telerik mechanism — and discovers the registered theme name by
+diffing before/after. If the package fails (version mismatch), it falls back
+to `telerikThemeName`, then to Fluent/FluentDark by `IsDark`.
 
 ## Menu wiring
 

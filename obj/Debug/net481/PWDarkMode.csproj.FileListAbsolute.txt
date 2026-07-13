@@ -1,0 +1,10 @@
+C:\Repos\PW-Custom-Themes\bin\Debug\net481\PWDarkMode.dll
+C:\Repos\PW-Custom-Themes\bin\Debug\net481\PWDarkMode.pdb
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.csproj.AssemblyReference.cache
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.GeneratedMSBuildEditorConfig.editorconfig
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.AssemblyInfoInputs.cache
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.AssemblyInfo.cs
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.csproj.CoreCompileInputs.cache
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.sourcelink.json
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.dll
+C:\Repos\PW-Custom-Themes\obj\Debug\net481\PWDarkMode.pdb

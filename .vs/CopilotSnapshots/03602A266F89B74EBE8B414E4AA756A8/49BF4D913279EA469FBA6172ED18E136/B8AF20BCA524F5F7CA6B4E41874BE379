@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PWDarkShim.cpp — native .mrr shim for PW Explorer (compile as C++/CLI, x86)
 //
 // Project settings:
@@ -17,17 +17,10 @@
 // ============================================================================
 
 #include <windows.h>
-#include <aawindms.h>
-#include <aaapi.h>
-#include <aadmsapi.h>
-#include <aawinapi.h>
 
 using namespace System;
 using namespace System::Reflection;
 using namespace System::IO;
-
-static bool g_themeMenuRegistered = false;
-static ULONG g_themeMenuCommandId = 0;
 
 // Forward a call into PWDarkMode.dll::PWDarkMode.ModuleEntry.<method>()
 static int CallManaged(const wchar_t* method)
@@ -49,59 +42,20 @@ static int CallManaged(const wchar_t* method)
     }
 }
 
-static LONG WINAPI ThemeMenuExecute(LPAACMDPARAM lpCommand)
-{
-    (void)lpCommand;
-    CallManaged(L"CycleTheme");
-    return 0;
-}
-
-static void RegisterThemeMenu()
-{
-    if (g_themeMenuRegistered)
-        return;
-
-    AADMSMENUITEM menuItem = {};
-
-    menuItem.ulMask = AADMSMIF_FLAGS | AADMSMIF_CMDTYPE;
-    menuItem.uiFlags = AAMIF_SEPARATOR;
-    menuItem.uiCmdType = AAMENU_DOCUMENT;
-    aaApi_AddCustomMenuItem(0, AADMSMI_LAST, &menuItem);
-
-    g_themeMenuCommandId = aaApi_ReserveCommandIdByType(AAMENU_DOCUMENT);
-
-    menuItem.ulMask = AADMSMIF_FLAGS | AADMSMIF_NAME | AADMSMIF_CMDTYPE |
-                      AADMSMIF_PROMPT | AADMSMIF_CMDID | AADMSMIF_CALLBACK;
-    menuItem.uiFlags = AAMIF_COMMAND;
-    menuItem.uiCmdType = AAMENU_DOCUMENT;
-    menuItem.lptstrPrompt = L"Cycle the active ProjectWise theme";
-    menuItem.lptstrName = L"PW Themes";
-    menuItem.uiCommandId = g_themeMenuCommandId;
-    menuItem.fpExecute = ThemeMenuExecute;
-    menuItem.ushParamType = AACMDPT_GENERIC;
-
-    aaApi_AddCustomMenuItem(0, AADMSMI_LAST, &menuItem);
-    g_themeMenuRegistered = true;
-}
-
 // ---------------------------------------------------------------------------
-// PW custom-module exports — these are the module entry points ProjectWise
-// will call. The menu registration is wired here so the shim shows up as a
-// custom menu item once the module is loaded.
+// PW custom-module exports — RENAME to match your SDK sample.
+// Called by PW Explorer on the UI thread at module load/unload.
+// This is also where you register the menu command via the aaApi_* GUI
+// functions from the SDK sample, wiring the command handler to OnDarkToggle.
 // ---------------------------------------------------------------------------
-
-extern "C" __declspec(dllexport) LONG WINAPI CustomInitialize(ULONG ulMask, LPVOID lpReserved)
-{
-    (void)ulMask;
-    (void)lpReserved;
-    RegisterThemeMenu();
-    CallManaged(L"Initialize");
-    return 0;
-}
 
 extern "C" __declspec(dllexport) int WINAPI PwModule_Initialize(void)
 {
-    RegisterThemeMenu();
+    // TODO: register menu items here per SDK sample.
+    // Option A (simple): one "Cycle Theme" item -> OnThemeCycle.
+    // Option B (nicer): call ModuleEntry.GetThemeList() (newline-separated
+    // names), build a "Themes" submenu with one item per name, and have each
+    // handler call ApplyTheme with its name.
     return CallManaged(L"Initialize");
 }
 

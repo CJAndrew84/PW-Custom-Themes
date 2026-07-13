@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net481</TargetFramework>
@@ -12,6 +12,11 @@
     <!-- PW Explorer is x86; keep everything 32-bit. -->
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="PWDarkShim.sln" />
+    <None Include="PWDarkShim.vcxproj" />
+  </ItemGroup>
 
   <!-- No compile-time Telerik references on purpose: the Telerik applier
        binds via reflection against whatever Telerik.WinControls version

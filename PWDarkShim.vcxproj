@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+	<ProjectConfiguration Include="Debug|Win32">
+	  <Configuration>Debug</Configuration>
+	  <Platform>Win32</Platform>
+	</ProjectConfiguration>
+	<ProjectConfiguration Include="Release|Win32">
+	  <Configuration>Release</Configuration>
+	  <Platform>Win32</Platform>
+	</ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+	<ProjectGuid>{A7A31A57-0411-4D54-B978-4D0FE1D9D8FA}</ProjectGuid>
+	<RootNamespace>PWDarkShim</RootNamespace>
+	<Keyword>ManagedCProj</Keyword>
+	<ProjectName>PWDarkShim</ProjectName>
+	<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+	<ConfigurationType>DynamicLibrary</ConfigurationType>
+	<UseDebugLibraries>true</UseDebugLibraries>
+	<PlatformToolset>v143</PlatformToolset>
+	<CLRSupport>true</CLRSupport>
+	<CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+	<ConfigurationType>DynamicLibrary</ConfigurationType>
+	<UseDebugLibraries>false</UseDebugLibraries>
+	<PlatformToolset>v143</PlatformToolset>
+	<CLRSupport>true</CLRSupport>
+	<CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+	<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+	<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+	<OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+	<IntDir>$(Platform)\$(Configuration)\</IntDir>
+	<TargetName>PWDarkShim</TargetName>
+	<TargetExt>.dll</TargetExt>
+	<LinkIncremental>true</LinkIncremental>
+	<TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+	<ClCompile>
+	  <WarningLevel>Level3</WarningLevel>
+	  <Optimization>Disabled</Optimization>
+	  <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <AdditionalIncludeDirectories>$(ProjectDir)shim;C:\Program Files\Bentley\ProjectWise\SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+	  <CompileAsManaged>true</CompileAsManaged>
+	  <LanguageStandard>stdcpp17</LanguageStandard>
+	</ClCompile>
+	<Link>
+	  <AdditionalDependencies>mcm.lib;dmscli.lib;dmawin.lib;dmsgen.lib;dmactrl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+	  <AdditionalLibraryDirectories>C:\Program Files\Bentley\ProjectWise\SDK\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+	  <GenerateDebugInformation>true</GenerateDebugInformation>
+	  <AssemblyDebug>true</AssemblyDebug>
+	  <SubSystem>Windows</SubSystem>
+	</Link>
+	<PostBuildEvent>
+	  <Command>xcopy /Y /D "$(TargetPath)" "$(SolutionDir)bin\$(Configuration)\\" &amp; xcopy /Y /D "$(SolutionDir)bin\Debug\net481\PWDarkMode.dll" "$(SolutionDir)bin\$(Configuration)\\" /D</Command>
+	</PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+	<ClCompile>
+	  <WarningLevel>Level3</WarningLevel>
+	  <Optimization>MaxSpeed</Optimization>
+	  <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <AdditionalIncludeDirectories>$(ProjectDir)shim;C:\Program Files\Bentley\ProjectWise\SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+	  <CompileAsManaged>true</CompileAsManaged>
+	  <LanguageStandard>stdcpp17</LanguageStandard>
+	</ClCompile>
+	<Link>
+	  <AdditionalDependencies>mcm.lib;dmscli.lib;dmawin.lib;dmsgen.lib;dmactrl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+	  <AdditionalLibraryDirectories>C:\Program Files\Bentley\ProjectWise\SDK\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+	  <GenerateDebugInformation>true</GenerateDebugInformation>
+	  <SubSystem>Windows</SubSystem>
+	</Link>
+	<PostBuildEvent>
+	  <Command>xcopy /Y /D "$(TargetPath)" "$(SolutionDir)bin\$(Configuration)\\" &amp; xcopy /Y /D "$(SolutionDir)bin\Release\net481\PWDarkMode.dll" "$(SolutionDir)bin\$(Configuration)\\" /D</Command>
+	</PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+	<ClCompile Include="shim\PWDarkShim.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+	<ProjectReference Include="PWDarkMode.csproj">
+	  <Project>{C428C8C0-C03D-4CC7-A39C-3E1C5275D0F4}</Project>
+	  <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+	</ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

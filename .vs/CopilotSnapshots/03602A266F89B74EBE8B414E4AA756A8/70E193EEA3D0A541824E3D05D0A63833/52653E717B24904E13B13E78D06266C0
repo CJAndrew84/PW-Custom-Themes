@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,17 +7,16 @@ using System.Windows.Forms;
 namespace PWDarkMode
 {
     /// <summary>
-    /// Optional Telerik layer for isolated managed surfaces. For ProjectWise
-    /// Explorer itself, the important theming path is the native Win32 layer
-    /// above; this class only kicks in if a specific ProjectWise dialog or add-in
-    /// actually loads Telerik.WinControls in the target build.
-    ///
-    /// Two routes are supported, in preference order per theme:
+    /// Telerik layer, generalised for corporate branding. Two routes, in
+    /// preference order per theme:
     ///
     ///   1. **.tssp package** (Theme.TelerikPackageFile) — a theme built in
     ///      Telerik Visual Style Builder with the full corporate palette,
-    ///      loaded via ThemeResolutionService.LoadPackageFile(). This is only
-    ///      useful when the target surface is truly Telerik-based.
+    ///      loaded via ThemeResolutionService.LoadPackageFile(). This is the
+    ///      *supported* Telerik mechanism for custom themes and the only way
+    ///      to get real branding (fonts, brand colours, hover states) into
+    ///      the Rad grids. Build once against PW's Telerik version, ship the
+    ///      .tssp next to the theme JSON.
     ///
     ///   2. **Named theme** (Theme.TelerikThemeName) — a stock theme already
     ///      registered in-process or loadable from a Telerik.WinControls.Themes.*

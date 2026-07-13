@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj": {}
+    "C:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj": {}
   },
   "projects": {
-    "c:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj": {
+    "C:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj",
+        "projectUniqueName": "C:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj",
         "projectName": "PWDarkMode",
-        "projectPath": "c:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj",
+        "projectPath": "C:\\Repos\\PW-Custom-Themes\\PWDarkMode.csproj",
         "packagesPath": "C:\\Users\\andr8298\\.nuget\\packages\\",
-        "outputPath": "c:\\Repos\\PW-Custom-Themes\\obj\\",
+        "outputPath": "C:\\Repos\\PW-Custom-Themes\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

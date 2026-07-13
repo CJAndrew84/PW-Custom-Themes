@@ -1,4 +1,4 @@
-# PWThemes — custom theming (corporate branding) for ProjectWise Explorer
+﻿# PWThemes — custom theming (corporate branding) for ProjectWise Explorer
 
 Native .mrr shim → net481/x86 C# assembly inside `pwc.exe`. For ProjectWise
 Explorer, the reliable path is native Win32/DWM/WM_CTLCOLOR theming applied to
